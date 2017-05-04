@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from pymongo import MongoClient
 app = Flask(__name__)
 
@@ -10,7 +10,7 @@ def hello_world():
 def menu_commitdb():
 
     import sqlite3
-    conn = sqlite3.connect('fineDine.db')
+    conn = sqlite3.connect('testdb.db')
     c=conn.cursor()
     c.execute('''DROP TABLE if exists food_menu ''')
     c.execute('''CREATE TABLE food_menu(item_id INTEGER PRIMARY KEY AUTOINCREMENT, rid INTEGER, f_name text, f_price INTEGER, f_cat text)''')
@@ -18,11 +18,11 @@ def menu_commitdb():
     conn.commit()
     return 'sucessfully reset food menu'
 
-@app.route('/menu1', methods=["GET","POST","request","put"])
+@app.route('/menu1/', methods=["GET","POST","REQUEST","PUT"])
 def menu_additem():
 
     import sqlite3
-    conn = sqlite3.connect('fineDine.db')
+    conn = sqlite3.connect('testdb.db')
     c=conn.cursor()
     rest_try=request.args.get('rest')
     name_try = request.args.get('name')
@@ -50,14 +50,19 @@ def menu_additem():
         return 'Some exception.'#RaiseToast that entry exists.
 
 
-@app.route('/menu/show_items', methods=["GET","POST","request","put"])
+@app.route('/menu/show_items/', methods=["GET","POST","request","put"])
 def menu_showitems():
 
     import sqlite3
-    conn = sqlite3.connect('fineDine.db')
+    conn = sqlite3.connect('testdb.db')
     c=conn.cursor()
     rest_try=request.args.get('rest_id')
     c.execute("SELECT * FROM food_menu where rid=?",(rest_try))
     rows=c.fetchall()
+    final_result = []
     for row in rows:
-        print(row)
+        final_result.append({"dish_name" : row[2],"dish_price":row[4]})
+    print (final_result)
+    c.close()
+    conn.close()
+    return jsonify(final_result)
